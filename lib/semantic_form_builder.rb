@@ -11,27 +11,18 @@ class SemanticFormBuilder < ActionView::Helpers::FormBuilder
     options.delete(:required)
     [field_name, label, options]
   end
-
-  def text_field(method, options = {})
-    field_name, label, options = field_settings(method, options)
-    wrapping("text", field_name, label, super, options)
+  
+  def self.create_labelled_field(method_name)
+    define_method(method_name) do |method, options|
+      field_name, label, options = field_settings(method, options)
+      wrapping("text", field_name, label, super, options)      
+    end
   end
 
-  def file_field(method, options = {})
-    field_name, label, options = field_settings(method, options)
-    wrapping("file", field_name, label, super, options)
+  (field_helpers - ['hidden_field']).uniq.each do |name|
+    create_labelled_field(name) unless name == 'hidden_field'
   end
-
-  def datetime_select(method, options = {})
-    field_name, label, options = field_settings(method, options)
-    wrapping("datetime", field_name, label, super, options)
-  end
-
-  def date_select(method, options = {})
-    field_name, label, options = field_settings(method, options)
-    wrapping("date", field_name, label, super, options)
-  end
-
+    
   def radio_button(method, tag_value, options = {})
     field_name, label, options = field_settings(method, options)
     wrapping("radio", field_name, label, super, options)
@@ -59,16 +50,6 @@ class SemanticFormBuilder < ActionView::Helpers::FormBuilder
     wrapping("datetime", field_name, label, super, options)
   end
   
-  def password_field(method, options = {})
-    field_name, label, options = field_settings(method, options)
-    wrapping("password", field_name, label, super, options)
-  end
-
-  def text_area(method, options = {})
-    field_name, label, options = field_settings(method, options)
-    wrapping("textarea", field_name, label, super, options)
-  end
-
   def submit(method, options = {})
     field_name, label, options = field_settings(method, options.merge( :label => "&nbsp;"))
     wrapping("submit", field_name, label, super, options)
@@ -88,11 +69,11 @@ class SemanticFormBuilder < ActionView::Helpers::FormBuilder
       html_options.delete('href')
       html_options.delete('alt')
       html_options.delete('confirm')
-      convert_options_to_javascript!(html_options)
+      # convert_options_to_javascript!(html_options)
     end
     
-    tag(:button, { :type => "submit", :class => "positive", :value => value }.update(html_options), true) +
-      image_tag("tick.png", { :alt => value })  + value +
+    @template.tag(:button, { :type => "submit", :class => "positive", :value => value }.update(html_options), true) +
+      @template.image_tag("tick.png", { :alt => value })  + value +
     "</button>"
   end
 
@@ -102,15 +83,15 @@ class SemanticFormBuilder < ActionView::Helpers::FormBuilder
     if options
       html_options = options.stringify_keys
       href = html_options['href']
-      convert_options_to_javascript!(html_options)
+      # convert_options_to_javascript!(html_options)
     end
     
-    tag(:a, { :class => "negative", :value => value }.update(html_options), true) +
-      image_tag("cross.png", { :alt => value })  + value +
+    @template.tag(:a, { :class => "negative", :value => value }.update(html_options), true) +
+      @template.image_tag("cross.png", { :alt => value })  + value +
     "</a>"
   end
   
-  def submit_and_cancel_buttons(submit_name, cancel_name, options = {})
+  def submit_and_cancel_buttons(submit_name = "Save", cancel_name = 'Cancel', options = {})
     submit_button = submit_button_tag(submit_name, options)
     cancel_button = cancel_button_tag(cancel_name, options)
     wrapping("submit", nil, "", submit_button+cancel_button, options)
