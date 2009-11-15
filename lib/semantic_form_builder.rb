@@ -13,7 +13,8 @@ class SemanticFormBuilder < ActionView::Helpers::FormBuilder
   end
   
   def self.create_labelled_field(method_name)
-    define_method(method_name) do |method, options|
+    define_method(method_name) do |method, *args|
+      options = args.first || {}
       field_name, label, options = field_settings(method, options)
       wrapping("text", field_name, label, super, options)      
     end
