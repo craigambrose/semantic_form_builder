@@ -20,7 +20,7 @@ class SemanticFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
-  (field_helpers - ['hidden_field']).uniq.each do |name|
+  (field_helpers + ['textile_editor'] - ['hidden_field']).uniq.each do |name|
     create_labelled_field(name) unless name == 'hidden_field'
   end
     
